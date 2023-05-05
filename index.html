@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <style>body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin: 0;
+        padding: 0
+    }
+
+    button {
+        width: 100px;
+        height: 40px;
+        margin: 10px
+    }
+
+    .timer {
+        position: relative;
+        width: 200px;
+        height: 200px;
+        border: 5px solid #ccc;
+        border-radius: 50%;
+        display: inline-block;
+        margin: 10px;
+        cursor: pointer;
+        transition: 0.3s
+    }
+
+    .timer:hover {
+        opacity: 0.7
+    }
+
+    .name, .time {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center
+    }
+
+    .time {
+        top: 60%
+    }</style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<button id="addBtn">Add</button>
+<button id="pauseBtn">Pause</button>
+<button id="resetBtn">Reset</button>
+<div id="container"></div>
+
+<div id="instructions">
+    <h2>Инструкция по работе с программой таймера:</h2>
+    <ol style="text-align: left">
+        <li><b>Добавление таймера:</b> Чтобы добавить таймер, нажмите кнопку "Add". В появившемся окне введите название таймера и нажмите "OK". Таймер появится на экране с указанным названием и временем "0:00".</li>
+        <li><b>Активация таймера:</b> Чтобы активировать таймер, нажмите на кружок с названием таймера. Активный таймер будет зеленым, и его время начнет увеличиваться. Если активировать другой таймер, предыдущий автоматически станет неактивным и его время остановится.</li>
+        <li><b>Пауза:</b> Чтобы приостановить все таймеры, нажмите кнопку "Pause". Все активные таймеры станут неактивными и их время остановится.</li>
+        <li><b>Сброс:</b> Чтобы удалить все таймеры, нажмите кнопку "Reset". Все таймеры будут удалены с экрана.</li>
+        <li><b>Удаление таймера:</b> Чтобы удалить отдельный таймер, щелкните правой кнопкой мыши на кружке с названием таймера и подтвердите удаление в появившемся окне.</li>
+        <li><b>Сохранение состояния:</b> Состояние всех таймеров (названия, время и активность) сохраняется в `localStorage`.</li>
+    </ol>
+</div>
+
+<script>$("#addBtn").click(() => {
+    const n = prompt("Enter name:");
+    if (n) {
+        const d = $("<div>").addClass("timer").click(l).contextmenu(r).appendTo("#container");
+        $.data(d[0], "timer", {timerName: n, startTime: null, elapsedTime: 0, active: false});
+        $("<div>").addClass("name").text(n).appendTo(d);
+        $("<div>").addClass("time").text("0:00").appendTo(d);
+        saveTimers()
+    }
+});
+$("#pauseBtn").click(p);
+$("#resetBtn").click(function () {
+    if (confirm("Вы уверены, что хотите сбросить все таймеры?")) {
+        s()
+    }
+});
+
+function l() {
+    const data = $.data(this, "timer");
+    if (data.active) {
+        p()
+    } else {
+        p();
+        data.active = true;
+        data.startTime = Date.now() - data.elapsedTime;
+        this.style.borderColor = "green";
+        a = this;
+        u(a);
+        saveTimers()
+    }
+}
+
+function r(e) {
+    e.preventDefault();
+    const data = $.data(this, "timer");
+    if (confirm(`Are you sure you want to delete '${data.timerName}' timer?`)) {
+        $(this).remove();
+        saveTimers()
+    }
+}
+
+function p() {
+    if (a) {
+        a.style.borderColor = "#ccc";
+        $.data(a, "timer").active = false;
+        a = null;
+        saveTimers()
+    }
+}
+
+function s() {
+    $("#container").empty();
+    saveTimers()
+}
+
+function u(d) {
+    const data = $.data(d, "timer");
+    const m = Math.floor(data.elapsedTime / 6e4);
+    const s = Math.floor((data.elapsedTime % 6e4) / 1e3);
+    $(d).find(".time").text(`${m}:${String(s).padStart(2, "0")}`)
+}
+
+function d() {
+    if (a && $.data(a, "timer").active) {
+        const data = $.data(a, "timer");
+        data.elapsedTime = Date.now() - data.startTime;
+        u(a);
+    }
+    requestAnimationFrame(d)
+}
+
+let a = null;
+requestAnimationFrame(d);
+
+function saveTimers() {
+    const timers = [];
+    $(".timer").each((i, e) => {
+        const data = $.data(e, "timer");
+        timers.push({
+            timerName: data.timerName,
+            startTime: data.startTime,
+            elapsedTime: data.elapsedTime,
+            active: false
+        })
+    });
+    localStorage.setItem("timers", JSON.stringify(timers))
+}
+
+function loadTimers() {
+    const storedTimers = JSON.parse(localStorage.getItem("timers"));
+    if (storedTimers) {
+        storedTimers.forEach(t => {
+            const d = $("<div>").addClass("timer").click(l).contextmenu(r).appendTo("#container");
+            $.data(d[0], "timer", {
+                timerName: t.timerName,
+                startTime: t.startTime,
+                elapsedTime: t.elapsedTime,
+                active: false
+            });
+            $("<div>").addClass("name").text(t.timerName).appendTo(d);
+            const m = Math.floor(t.elapsedTime / 6e4);
+            const s = Math.floor((t.elapsedTime % 6e4) / 1e3);
+            $("<div>").addClass("time").text(`${m}:${String(s).padStart(2, "0")}`).appendTo(d)
+        })
+    }
+}
+
+loadTimers();
+setInterval(saveTimers, 1000);
+
+</script>
+</body>
+</html>
