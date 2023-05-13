@@ -2,46 +2,80 @@
 <html>
 <head>
     <meta charset="UTF-8" />
-    <style>body {
-        font-family: Arial, sans-serif;
-        text-align: center;
-        margin: 0;
-        padding: 0
-    }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0
+        }
 
-    button {
-        width: 100px;
-        height: 40px;
-        margin: 10px
-    }
+        button {
+            width: 100px;
+            height: 40px;
+            margin: 10px
+        }
 
-    .timer {
-        position: relative;
-        width: 200px;
-        height: 200px;
-        border: 5px solid #ccc;
-        border-radius: 50%;
-        display: inline-block;
-        margin: 10px;
-        cursor: pointer;
-        transition: 0.3s
-    }
+        .timer {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            border: 5px solid #ccc;
+            border-radius: 50%;
+            display: inline-block;
+            margin: 10px;
+            cursor: pointer;
+            transition: 0.3s
+        }
 
-    .timer:hover {
-        opacity: 0.7
-    }
+        .timer:hover {
+            opacity: 0.7
+        }
 
-    .name, .time {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        text-align: center
-    }
+        .name, .time {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center
+        }
 
-    .time {
-        top: 60%
-    }</style>
+        .time {
+            top: 60%
+        }
+
+        .container, textarea {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            margin: 20px;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .timer {
+                width: 150px;
+                height: 150px;
+            }
+
+            button {
+                width: 80px;
+                height: 30px;
+                font-size: 14px;
+            }
+
+            textarea {
+                font-size: 14px;
+            }
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
@@ -49,16 +83,17 @@
 <button id="pauseBtn">Pause</button>
 <button id="resetBtn">Reset</button>
 <div id="container"></div>
+<textarea id="notebook" placeholder="Записная книжка"></textarea>
+
 
 <div id="instructions">
     <h2>Инструкция по работе с программой таймера:</h2>
     <ol style="text-align: left">
         <li><b>Добавление таймера:</b> Чтобы добавить таймер, нажмите кнопку "Add". В появившемся окне введите название таймера и нажмите "OK". Таймер появится на экране с указанным названием и временем "0:00".</li>
         <li><b>Активация таймера:</b> Чтобы активировать таймер, нажмите на кружок с названием таймера. Активный таймер будет зеленым, и его время начнет увеличиваться. Если активировать другой таймер, предыдущий автоматически станет неактивным и его время остановится.</li>
-        <li><b>Пауза:</b> Чтобы приостановить все таймеры, нажмите кнопку "Pause". Все активные таймеры станут неактивными и их время остановится.</li>
-        <li><b>Сброс:</b> Чтобы удалить все таймеры, нажмите кнопку "Reset". Все таймеры будут удалены с экрана.</li>
-        <li><b>Удаление таймера:</b> Чтобы удалить отдельный таймер, щелкните правой кнопкой мыши на кружке с названием таймера и подтвердите удаление в появившемся окне.</li>
-        <li><b>Сохранение состояния:</b> Состояние всех таймеров (названия, время и активность) сохраняется в `localStorage`.</li>
+        <li><b>Пауза:</b> Чтобы приостановить все таймеры, нажмите кнопку "Pause". Все таймеры приостановятся, и их время останется на месте.</li>
+        <li><b>Сброс:</b> Чтобы сбросить все таймеры, нажмите кнопку "Reset". Время всех таймеров вернется к "0:00".</li>
+        <li><b>Записная книжка:</b> Используйте поле "Записная книжка" для ввода заметок или информации о вашей работе. Все данные будут сохраняться в localstorage и восстанавливаться при перезагрузке страницы.</li>
     </ol>
 </div>
 
@@ -171,6 +206,19 @@ function loadTimers() {
 
 loadTimers();
 setInterval(saveTimers, 1000);
+
+$("#notebook").on("input", function () {
+    localStorage.setItem("notebookContent", $(this).val());
+});
+
+function loadNotebook() {
+    const storedNotebookContent = localStorage.getItem("notebookContent");
+    if (storedNotebookContent) {
+        $("#notebook").val(storedNotebookContent);
+    }
+}
+
+loadNotebook();
 
 </script>
 </body>
